@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from app.routes.movies import router as movie_router
 
 app=FastAPI(title="Movie Recommendation API")
 
@@ -15,6 +16,4 @@ app.add_middleware(
 def home():
     return {"message": "Movie Recommendation API is running"}
 
-@app.get("/api/movies")
-def get_movies():
-    return {"movies": []}
+app.include_router(movie_router)
