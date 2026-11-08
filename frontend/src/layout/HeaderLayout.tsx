@@ -1,10 +1,22 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Menu, X, Search } from "lucide-react";
 import { useState } from "react";
 import { cn } from "cn";
 
 const HeaderLayout = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const navigate = useNavigate();
+
+  //Handle movie search submission
+  const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    const query = searchQuery.trim();
+    if (!query) return;
+    navigate(`/search?q=${encodeURIComponent(query)}`);
+    setIsMenuOpen(false);
+  };
   return (
     <>
       <header className="w-full bg-primary text-primary-foreground shadow-sm">
@@ -28,13 +40,25 @@ const HeaderLayout = () => {
               Explore
             </Link>
 
-            <Link
-              to="/search"
-              className="flex items-center gap-2 transition-colors hover:text-white/70"
+            <form
+              onSubmit={handleSearch}
+              className="hidden max-w-xs flex-1 items-center rounded-md bg-white md:flex"
             >
-              <Search size={17} />
-              Search
-            </Link>
+              <input
+                type="search"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search movies..."
+                className="min-w-0 flex-1 bg-transparent px-3 py-2 text-sm text-[#242A30] outline-none placeholder:text-[#64717C]"
+              />
+              <button
+                type="submit"
+                aria-label="Search movies"
+                className="px-3 text-[#2180CB] hover:text-[#1B92E4]"
+              >
+                <Search size={19} />
+              </button>
+            </form>
           </div>
 
           {/* Mobile menu button */}
@@ -88,16 +112,25 @@ const HeaderLayout = () => {
                 Explore
               </Link>
 
-              <Link
-                to="/search"
-                onClick={() => setIsMenuOpen(false)}
-                className="rounded-md px-3 py-2 hover:bg-white/10"
+              <form
+                onSubmit={handleSearch}
+                className="hidden max-w-xs flex-1 items-center rounded-md bg-white md:flex"
               >
-                <span className="flex items-center gap-2">
-                  <Search size={17} />
-                  Search
-                </span>
-              </Link>
+                <input
+                  type="search"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search movies..."
+                  className="min-w-0 flex-1 bg-transparent px-3 py-2 text-sm text-[#242A30] outline-none placeholder:text-[#64717C]"
+                />
+                <button
+                  type="submit"
+                  aria-label="Search movies"
+                  className="px-3 text-[#2180CB] hover:text-[#1B92E4]"
+                >
+                  <Search size={19} />
+                </button>
+              </form>
             </div>
           </div>
         )}
