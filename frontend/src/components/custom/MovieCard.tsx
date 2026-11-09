@@ -7,30 +7,45 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import type { Movie } from "@/types/movie";
 
-const MovieCard = () => {
+interface MovieCardProps {
+  movie: Movie;
+}
+
+const MovieCard = ({ movie }: MovieCardProps) => {
+  // Convert the genre string into an array
+  const genres = movie.genres
+    .split("|")
+    .filter((genre) => genre !== "(no genres listed)");
   return (
     <>
-      <Card className="border-border bg-card text-card-foreground transition-all hover:border-primary/50">
-        {/* Movie title */}
-        <CardHeader>
-          <CardTitle>Interstellar</CardTitle>
-          <CardDescription>Card Description</CardDescription>
-          <CardAction>Card Action</CardAction>
-        </CardHeader>
+      <article className="overflow-hidden rounded-lg border border-[#D5D9DE] bg-white shadow-sm transition-shadow hover:shadow-md">
+        {/* Movie placeholder */}
+        <div className="flex aspect-[3/4] items-center justify-center bg-[#E0EDF7]">
+          <span className="text-4xl font-bold text-primary">
+            {movie.title.charAt(0)}
+          </span>
+        </div>
 
         {/* Movie information */}
-        <CardContent>
-          <p className="text-muted-foreground">Sci-Fi • Adventure • Drama</p>
-          <button className="cursor-pointer mt-4 rounded-lg bg-primary px-4 py-2 text-primary-foreground hover:bg-primary/90">
-            View Details
-          </button>
-        </CardContent>
+        <div className="p-3">
+          <h3 className="line-clamp-2 text-sm font-semibold text-[#242A30]">
+            {movie.title}
+          </h3>
 
-        <CardFooter>
-          <p>Card Footer</p>
-        </CardFooter>
-      </Card>
+          <div className="mt-2 flex flex-wrap gap-1">
+            {genres.slice(0, 2).map((genre) => (
+              <span
+                key={genre}
+                className="rounded bg-[#E0EDF7] px-2 py-1 text-xs text-[#00619D]"
+              >
+                {genre}
+              </span>
+            ))}
+          </div>
+        </div>
+      </article>
     </>
   );
 };

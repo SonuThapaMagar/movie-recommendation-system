@@ -59,6 +59,14 @@ const HeaderLayout = () => {
                 <Search size={19} />
               </button>
             </form>
+
+            {/* Desktop login link */}
+            <Link
+              to="/login"
+              className="hidden rounded-md border border-white/60 px-4 py-2 text-sm font-medium transition-colors hover:bg-white hover:text-primary md:block"
+            >
+              Login
+            </Link>
           </div>
 
           {/* Mobile menu button */}
@@ -131,6 +139,14 @@ const HeaderLayout = () => {
                   <Search size={19} />
                 </button>
               </form>
+
+              <Link
+                to="/login"
+                onClick={() => setIsMenuOpen(false)}
+                className="rounded-md px-3 py-2 hover:bg-white/10"
+              >
+                Login
+              </Link>
             </div>
           </div>
         )}
