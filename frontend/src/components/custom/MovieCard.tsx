@@ -13,10 +13,21 @@ const MovieCard = ({ movie }: MovieCardProps) => {
     <>
       <article className="overflow-hidden rounded-lg border border-[#D5D9DE] bg-white shadow-sm transition-shadow hover:shadow-md cursor-pointer">
         {/* Movie placeholder */}
-        <div className="flex aspect-[3/4] items-center justify-center bg-[#E0EDF7]">
-          <span className="text-4xl font-bold text-primary">
-            {movie.title.charAt(0)}
-          </span>
+        <div className="aspect-[3/4] overflow-hidden bg-[#E0EDF7]">
+          {movie.poster_url ? (
+            <img
+              src={movie.poster_url}
+              alt={`${movie.title} poster`}
+              loading="lazy"
+              className="h-full w-full object-cover transition-transform duration-300 hover:scale-105"
+            />
+          ) : (
+            <div className="flex h-full items-center justify-center">
+              <span className="text-4xl font-bold text-primary">
+                {movie.title.charAt(0)}
+              </span>
+            </div>
+          )}
         </div>
 
         {/* Movie information */}
