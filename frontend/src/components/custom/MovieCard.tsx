@@ -1,4 +1,5 @@
 import type { Movie } from "@/types/movie";
+import { Star } from "lucide-react";
 
 interface MovieCardProps {
   movie: Movie;
@@ -9,6 +10,12 @@ const MovieCard = ({ movie }: MovieCardProps) => {
   const genres = movie.genres
     .split("|")
     .filter((genre) => genre !== "(no genres listed)");
+
+  //Extract release year
+  const releaseYear = movie.release_date
+    ? movie.release_date.slice(0, 4)
+    : null;
+
   return (
     <>
       <article className="overflow-hidden rounded-lg border border-[#D5D9DE] bg-white shadow-sm transition-shadow hover:shadow-md cursor-pointer">
@@ -32,10 +39,25 @@ const MovieCard = ({ movie }: MovieCardProps) => {
 
         {/* Movie information */}
         <div className="p-3">
-          <h3 className="line-clamp-2 text-sm font-semibold text-[#242A30]">
+          <h3 className="line-clamp-2 text-sm font-semibold text-primary">
             {movie.title}
           </h3>
 
+          {/* Movie rating badge */}
+          {movie.rating != null && (
+            <div className="right-2 top-2 flex items-center gap-1 rounded-md py-1.5 text-xs font-semibold text-[#242A30] backdrop-blur-sm">
+              <Star size={16} className="fill-yellow-400 text-yellow-400" />
+
+              <span>{movie.rating.toFixed(1)}</span>
+            </div>
+          )}
+
+          {/* Release year */}
+          {releaseYear && (
+            <p className="mt-1 text-xs text-[#64717C]">{releaseYear}</p>
+          )}
+
+          {/* Genres */}
           <div className="mt-2 flex flex-wrap gap-1">
             {genres.slice(0, 2).map((genre) => (
               <span

@@ -15,7 +15,7 @@ TMDB_BASE_URL = "https://api.themoviedb.org/3"
 TMDB_IMAGE_URL = "https://image.tmdb.org/t/p/w500"
 
 @lru_cache(maxsize=1000)
-def get_movie_poster(title:str):
+def get_movie_details(title:str):
     """
     Search TMDB using a MovieLens movie title.
     Cache results to avoid repeating the same API request.
@@ -39,19 +39,28 @@ def get_movie_poster(title:str):
     try:
         response=httpx.get(f"{TMDB_BASE_URL}/search/movie",params=params,timeout=10.0)
         response.raise_for_status()
-        
-        data=response.json()
-        results=data.get("results",[])
+        results=response.json().get("results",[])
         
         if not results:
             return None
         
         #Get the first moving movie
-        poster_path=results[0].get("poster_path")
+        movie=results[0]
+        poster_path=movie.get("poster_path")
         if not poster_path:
             return None
         
-        return f"{TMDB_IMAGE_URL}{poster_path}"
+        return {
+            "tmdb_id": movie.get("id"),
+            "poster_url": (
+                f"{TMDB_IMAGE_URL}{poster_path}"
+                if poster_path
+                else None
+            ),
+            "rating": movie.get("vote_average"),
+            "overview": movie.get("overview"),
+            "release_date": movie.get("release_date"),
+        }
     
     except httpx.HTTPError as error:
         print(f"TMDB request failed for {title}:{error}")
