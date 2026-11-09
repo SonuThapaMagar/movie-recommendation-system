@@ -38,3 +38,27 @@ def get_all_movies(limit=20):
     
     # Converts rows into dictionaries so FastAPI can return as JSON
     return movies
+
+#Get movie by id
+def get_movie_by_id(movie_id:int):
+    """Find one movie using its MovieLens ID."""
+    df=load_movies()
+    
+    movie=df[df["movieId"]==movie_id]
+    if movie.empty:
+        return None
+    
+    movie_data=movie.iloc[0].to_dict()
+    # Add TMDB information
+    details=get_movie_details(movie_data['title'])
+    movie_data.update(
+        details or {
+            "tmdb_id": None,
+            "poster_url": None,
+            "rating": None,
+            "overview": None,
+            "release_date": None,
+        }
+    )
+    
+    return movie_data

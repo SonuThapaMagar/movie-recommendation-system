@@ -9,3 +9,8 @@ export interface Movie {
   overview?: string | null;
   release_date?: string | null;
 }
+
+export interface MovieResponse {
+  count: number;
+  movies: Movie[];
+}
