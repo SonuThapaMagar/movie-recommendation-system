@@ -1,12 +1,3 @@
-import {
-  Card,
-  CardAction,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import type { Movie } from "@/types/movie";
 
 interface MovieCardProps {
@@ -20,7 +11,7 @@ const MovieCard = ({ movie }: MovieCardProps) => {
     .filter((genre) => genre !== "(no genres listed)");
   return (
     <>
-      <article className="overflow-hidden rounded-lg border border-[#D5D9DE] bg-white shadow-sm transition-shadow hover:shadow-md">
+      <article className="overflow-hidden rounded-lg border border-[#D5D9DE] bg-white shadow-sm transition-shadow hover:shadow-md cursor-pointer">
         {/* Movie placeholder */}
         <div className="flex aspect-[3/4] items-center justify-center bg-[#E0EDF7]">
           <span className="text-4xl font-bold text-primary">
