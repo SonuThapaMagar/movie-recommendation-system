@@ -1,64 +1,57 @@
-from pathlib import Path
-import pandas as pd
+from sqlalchemy.orm import Session
+from sqlalchemy import func
+from app.models.movie import Movie
 
 from app.services.tmdb_service import get_movie_details
 
-# Movie dataset
-DATA_PATH=Path(__file__).resolve().parents[2]/"data"/"movies.csv"
-
-#Loading movie data
-def load_movies():
-    df=pd.read_csv(DATA_PATH)
+# Convert SQLAlchemy Movie object into a Python dictionary
+def _movie_to_dict(movie:Movie):
+    # Get movie information from PostgreSQL
+    movie_data={
+        "movieId":movie.movie_id,
+        "title":movie.title,
+        "genres":movie.genres,
+        
+        "tmdb_id": movie.tmdb_id,
+        "poster_url": movie.poster_url,
+        "overview": movie.overview,
+        "rating": movie.rating,
+        "release_date": movie.release_date
+    }
     
-    # Handle missing vaues
-    df['genres']=df['genres'].fillna("")
-    
-    return df
+    if not movie.poster_url:
+        details=get_movie_details(movie.title)
+        if (details):
+            movie_data.update(details)
+        
+    return movie_data
 
 #Get all movies
-def get_all_movies(limit=20):
-    
-    df=load_movies()
-    
-    movies=df.head(limit).to_dict(orient="records")
-    
-    for movie in movies:
-        details=get_movie_details(movie["title"])
+def get_all_movies(db:Session,limit:int=20,skip:int=0,search:str|None=None,genre:str|None=None):
         
-        # TMDB details to MovieLens data
-        movie.update(
-            details or {
-                "tmdb_id":None,
-                "poster_url":None,
-                "rating":None,
-                "overview":None,
-                "release_date":None
-            }
-        )
+    query=db.query(Movie)
     
-    # Converts rows into dictionaries so FastAPI can return as JSON
-    return movies
+    #Search movie by title
+    if search:query=query.filter(Movie.title.ilike(f"%{search}%"))
+    
+    #Filter movie by genre
+    if genre:query=query.filter(Movie.genres.ilike(f"%{genre}%"))
+        
+    # Count matching movies before pagination.
+    total_count=query.with_entities(func.count(Movie.movie_id)).scalar()
+    
+    # Apply sorting, skipping, and limiting
+    movies=(query.order_by(Movie.movie_id).offset(skip).limit(limit).all())
+    movie_data = [_movie_to_dict(movie) for movie in movies ]
+        
+    return {
+        "count": total_count,
+        "movies": movie_data
+    }
 
 #Get movie by id
-def get_movie_by_id(movie_id:int):
-    """Find one movie using its MovieLens ID."""
-    df=load_movies()
+def get_movie_by_id(db:Session,movie_id:int):
     
-    movie=df[df["movieId"]==movie_id]
-    if movie.empty:
-        return None
-    
-    movie_data=movie.iloc[0].to_dict()
-    # Add TMDB information
-    details=get_movie_details(movie_data['title'])
-    movie_data.update(
-        details or {
-            "tmdb_id": None,
-            "poster_url": None,
-            "rating": None,
-            "overview": None,
-            "release_date": None,
-        }
-    )
-    
-    return movie_data
+    movie=(db.query(Movie).filter(Movie.movie_id==movie_id).first())
+    if movie is None: return None
+    return _movie_to_dict(movie)
