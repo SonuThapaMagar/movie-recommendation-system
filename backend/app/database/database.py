@@ -15,7 +15,7 @@ if not DATABASE_URL:
 engine=create_engine(DATABASE_URL,pool_pre_ping=True)
 
 #Create db session factory
-SessionLocal=sessionmaker(autocommit=False,autoflush=False,bing=engine)
+SessionLocal=sessionmaker(autocommit=False,autoflush=False,bind=engine)
 
 # Base class for database models base=Parent class for database models
 Base = declarative_base()

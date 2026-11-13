@@ -9,7 +9,7 @@ class MovieTag(Base):
     
     dataset_user_id = Column(Integer, nullable=False, index=True)
     
-    movie_id=Column(Integer,ForeignKey="movies.movie_id",nullable=False,index=True)
+    movie_id=Column(Integer,ForeignKey("movies.movie_id"),nullable=False,index=True)
     
     tag=Column(String(255),nullable=False)
     
