@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-
+import { Link, useNavigate } from "react-router-dom";
 import { recommendationService } from "@/services/recommendationService";
 import type { RecommendedMovie } from "@/types/movie";
 
@@ -11,6 +11,8 @@ const RecommendedMovies = ({ movieId }: RecommendedMoviesProps) => {
   const [movies, setMovies] = useState<RecommendedMovie[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchRecommendations = async () => {
@@ -53,9 +55,10 @@ const RecommendedMovies = ({ movieId }: RecommendedMoviesProps) => {
 
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-5">
         {movies.map((movie) => (
-          <div
+          <Link
             key={movie.movie_id}
-            className="rounded-lg overflow-hidden border shadow-sm"
+            to={`/movies/${movie.movie_id}`}
+            className="block rounded-lg overflow-hidden border shadow-sm hover:shadow-lg hover:scale-[1.02] transition-all duration-200"
           >
             {/* Movie Poster */}
             <div className="aspect-[2/3] bg-gray-200">
@@ -76,7 +79,7 @@ const RecommendedMovies = ({ movieId }: RecommendedMoviesProps) => {
                 Similarity: {(movie.similarity_score * 100).toFixed(1)}%
               </p>
             </div>
-          </div>
+          </Link>
         ))}
       </div>
     </section>

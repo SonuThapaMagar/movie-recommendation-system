@@ -19,10 +19,20 @@ def _movie_to_dict(movie:Movie):
         "release_date": movie.release_date
     }
     
-    if not movie.poster_url:
-        details=get_movie_details(movie.title)
-        if (details):
-            movie_data.update(details)
+    if (
+    not movie.poster_url
+    or not movie.overview
+    or movie.rating is None
+    or not movie.release_date
+    ):
+        details = get_movie_details(movie.title)
+
+        if details:
+            movie_data.update({
+                key: value
+                for key, value in details.items()
+                if value is not None
+            })
         
     return movie_data
 
