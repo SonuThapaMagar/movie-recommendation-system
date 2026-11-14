@@ -4,6 +4,7 @@ import { Link, useParams } from "react-router-dom";
 import { movieServices } from "@/services/movieService";
 import type { Movie } from "@/types/movie";
 import { ArrowLeft, Star } from "lucide-react";
+import RecommendedMovies from "@/components/custom/RecommendedMovies";
 
 const MovieDetails = () => {
   // Get movie ID from URL
@@ -143,6 +144,8 @@ const MovieDetails = () => {
           </div>
         </div>
       </section>
+
+      <RecommendedMovies movieId={movie.movieId} />
     </div>
   );
 };

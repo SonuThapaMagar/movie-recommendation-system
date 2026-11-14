@@ -14,3 +14,17 @@ export interface MovieResponse {
   count: number;
   movies: Movie[];
 }
+
+export interface RecommendedMovie {
+  movie_id: number;
+  title: string;
+  genres: string;
+  poster_url: string | null;
+  similarity_score: number;
+}
+
+export interface RecommendationResponse {
+  movie_id: number;
+  count: number;
+  recommendations: RecommendedMovie[];
+}

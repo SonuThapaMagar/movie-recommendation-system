@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.models.movie import Movie
 from app.models.movie_tag import MovieTag
+from app.services.movie_service import get_movie_details
 
 def prepare_movie_data(db:Session):
     #Fetch all movies
@@ -39,6 +40,7 @@ def prepare_movie_data(db:Session):
             "title": movie.title,
             "genres": genres,
             "tags": tags_text,
+            "poster_url": movie.poster_url,
             "combined_features": combined_features
         })
         
@@ -84,6 +86,7 @@ def get_movie_recommendations(db, movie_id, top_n=10):
     similar_indices = similarity_scores.argsort()[::-1]
 
     recommendations = []
+    updated_posters = False
 
     for index in similar_indices:
 
@@ -91,10 +94,31 @@ def get_movie_recommendations(db, movie_id, top_n=10):
         if index == movie_index:
             continue
 
+        recommended_movie_id = int(
+            df.iloc[index]["movie_id"]
+        )
+        
+        # Get movie from database
+        movie = db.query(Movie).filter(
+            Movie.movie_id == recommended_movie_id
+        ).first()
+        poster_url = movie.poster_url if movie else None
+        
+        # Fetch poster from TMDB
+        if movie and not poster_url:
+            details = get_movie_details(movie.title)
+            if details:
+                poster_url = details.get("poster_url")
+                
+                # Save poster URL in database
+                if poster_url:
+                    movie.poster_url = poster_url
+                    updated_posters = True
         recommendations.append({
             "movie_id": int(df.iloc[index]["movie_id"]),
             "title": df.iloc[index]["title"],
             "genres": df.iloc[index]["genres"],
+            "poster_url": poster_url,
             "similarity_score": round(
                 float(similarity_scores[index]), 4
             )
@@ -103,4 +127,7 @@ def get_movie_recommendations(db, movie_id, top_n=10):
         if len(recommendations) == top_n:
             break
 
+    if updated_posters:
+        db.commit()
+        
     return recommendations
