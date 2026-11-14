@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 
 from app.database.database import get_db
 from app.services.movie_service import (get_all_movies,get_movie_by_id)
+from app.services.recommendation_service import (get_movie_recommendations)
 from app.schemas.movie import (MovieResponse,MovieListResponse)
 
 router=APIRouter(prefix='/api/movies',tags=['Movies'])
@@ -38,3 +39,15 @@ def get_movie(
         )
 
     return movie
+
+@router.get("/{movie_id}/recommendations")
+def recommend_movies(movie_id:int,top_n:int=Query(default=10,ge=1,le=50),db:Session=Depends(get_db)):
+    recommendations=get_movie_recommendations(db=db,movie_id=movie_id,top_n=top_n)
+    if recommendations is None:
+        raise HTTPException(status_code=404,detail="Movie not found")
+    
+    return {
+        "movie_id": movie_id,
+        "count": len(recommendations),
+        "recommendations": recommendations
+    }
