@@ -102,23 +102,41 @@ def get_movie_recommendations(db, movie_id, top_n=10):
         movie = db.query(Movie).filter(
             Movie.movie_id == recommended_movie_id
         ).first()
-        poster_url = movie.poster_url if movie else None
         
-        # Fetch poster from TMDB
-        if movie and not poster_url:
+        if not movie:
+            continue
+        
+        if (
+            not movie.poster_url
+            or not movie.overview
+            or movie.rating is None
+            or not movie.release_date
+        ):
             details = get_movie_details(movie.title)
+
             if details:
-                poster_url = details.get("poster_url")
+                # Update only fields with valid values
+                for field in [
+                    "poster_url",
+                    "overview",
+                    "rating",
+                    "release_date",
+                    "tmdb_id"
+                ]:
+                    value = details.get(field)
+
+                    if value is not None:
+                        setattr(movie, field, value)
+                        updated_movies = True
                 
-                # Save poster URL in database
-                if poster_url:
-                    movie.poster_url = poster_url
-                    updated_posters = True
         recommendations.append({
-            "movie_id": int(df.iloc[index]["movie_id"]),
-            "title": df.iloc[index]["title"],
-            "genres": df.iloc[index]["genres"],
-            "poster_url": poster_url,
+            "movie_id": movie.movie_id,
+            "title": movie.title,
+            "genres":  movie.genres or "",
+            "poster_url": movie.poster_url,
+            "rating": movie.rating,
+            "overview": movie.overview,
+            "release_date": movie.release_date,
             "similarity_score": round(
                 float(similarity_scores[index]), 4
             )

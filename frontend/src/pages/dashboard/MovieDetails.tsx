@@ -145,7 +145,9 @@ const MovieDetails = () => {
         </div>
       </section>
 
-      <RecommendedMovies movieId={movie.movieId} />
+      <section className="px-8">
+        <RecommendedMovies movieId={movie.movieId} />
+      </section>
     </div>
   );
 };

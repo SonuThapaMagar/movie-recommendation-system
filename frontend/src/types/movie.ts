@@ -20,6 +20,9 @@ export interface RecommendedMovie {
   title: string;
   genres: string;
   poster_url: string | null;
+  rating: number | null;
+  overview: string | null;
+  release_date: string | null;
   similarity_score: number;
 }
 
