@@ -1,5 +1,7 @@
 from datetime import datetime, timezone
 from sqlalchemy import Column,DateTime, Integer, String
+from sqlalchemy.orm import relationship
+
 from app.database.database import Base
 
 class User(Base):
@@ -20,3 +22,6 @@ class User(Base):
         DateTime(timezone=True),
         default=lambda: datetime.now(timezone.utc),
     )
+    
+    # Relationships
+    ratings=relationship("Rating",back_populates="user")

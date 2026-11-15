@@ -11,6 +11,9 @@ class Rating(Base):
     # Original MovieLens user ID
     dataset_user_id=Column(Integer,nullable=False,index=True)
     
+    # Registered application user ID
+    user_id = Column(Integer,ForeignKey("users.id"),nullable=True,index=True)
+    
     #Movie relationship
     movie_id=Column(Integer,ForeignKey("movies.movie_id"),nullable=False,index=True)
     
@@ -20,3 +23,4 @@ class Rating(Base):
     
     # Relationship
     movie=relationship("Movie",back_populates="ratings")
+    user = relationship("User", back_populates="ratings")
