@@ -2,11 +2,15 @@ from fastapi import APIRouter,Depends,HTTPException,status
 from sqlalchemy.orm import Session
 
 from app.database.database import get_db
-from app.schemas.auth import UserResgister,UserResponse
+from app.schemas.auth import UserRegister,UserResponse
 from app.services.auth_service import register_user
 from app.schemas.response import ApiResponse
 from app.utils.response import success_response
 from fastapi import Request
+
+from app.schemas.auth import UserLogin,TokenResponse
+from app.services.auth_service import authenticate_user
+from app.utils.security import create_access_token,ACCESS_TOKEN_EXPIRE_MINUTES
 
 router = APIRouter(prefix="/api/auth", tags=["Authentication"])
 
@@ -15,7 +19,7 @@ router = APIRouter(prefix="/api/auth", tags=["Authentication"])
     response_model=ApiResponse[UserResponse],
     status_code=status.HTTP_201_CREATED
 )
-def register(request: Request,user_data:UserResgister,db:Session=Depends(get_db)):
+def register(request: Request,user_data:UserRegister,db:Session=Depends(get_db)):
     user,error=register_user(
         db=db,
         username=user_data.username,
@@ -44,4 +48,28 @@ def register(request: Request,user_data:UserResgister,db:Session=Depends(get_db)
         status=status.HTTP_201_CREATED,
         message="User registered successfully",
         data=UserResponse.model_validate(user)
+    )
+    
+#Login
+@router.post("/login",response_model=ApiResponse[TokenResponse],status_code=status.HTTP_200_OK)
+def login(request:Request,user_data:UserLogin,db:Session=Depends(get_db)):
+    user=authenticate_user(
+        db=db,
+        email=user_data.email,
+        password=user_data.password
+    )
+    if not user:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail="Invalid email or password")
+    
+    access_token=create_access_token(user.id)
+    
+    return success_response(
+        request=request,
+        status=status.HTTP_200_OK,
+        message="Login successful",
+        data=TokenResponse(
+            access_token=access_token,
+            token_type="bearer",
+            expires_in=ACCESS_TOKEN_EXPIRE_MINUTES * 60
+        )
     )

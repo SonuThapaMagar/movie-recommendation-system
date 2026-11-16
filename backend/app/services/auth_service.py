@@ -42,3 +42,14 @@ def register_user(
     except Exception:
         db.rollback()
         raise
+
+#auth
+def authenticate_user(db:Session,email:str,password:str):
+    email=email.strip().lower()
+    user=db.query(User).filter(User.email==email).first()
+    
+    if not User: return None
+    
+    if not password_hash.verify(password,user.hashed_password): return None
+    
+    return user
