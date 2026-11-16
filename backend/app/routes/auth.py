@@ -11,6 +11,8 @@ from fastapi import Request
 from app.schemas.auth import UserLogin,TokenResponse
 from app.services.auth_service import authenticate_user
 from app.utils.security import create_access_token,ACCESS_TOKEN_EXPIRE_MINUTES
+from app.dependencies.auth import get_current_user
+from app.models.user import User
 
 router = APIRouter(prefix="/api/auth", tags=["Authentication"])
 
@@ -73,3 +75,15 @@ def login(request:Request,user_data:UserLogin,db:Session=Depends(get_db)):
             expires_in=ACCESS_TOKEN_EXPIRE_MINUTES * 60
         )
     )
+    
+#Me
+@router.get("/me",response_model=ApiResponse[UserResponse],status_code=status.HTTP_200_OK)
+def get_me(request:Request,current_user: User = Depends(get_current_user)):
+    return success_response(
+        request=request,
+        status=status.HTTP_200_OK,
+        message="User retrieved successfully",
+        data=UserResponse.model_validate(current_user)
+    )
+
+    
