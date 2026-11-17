@@ -5,6 +5,7 @@ from fastapi import HTTPException
 from app.utils.exception_handlers import(http_Exception_handler,validation_exception_handler)
 from app.routes.movies import router as movie_router
 from app.routes.auth import router as auth_router
+from app.routes.favorites import router as favorite_router
 
 app=FastAPI(title="Movie Recommendation API")
 
@@ -22,6 +23,7 @@ def home():
 
 app.include_router(movie_router)
 app.include_router(auth_router)
+app.include_router(favorite_router)
 
 app.add_exception_handler(
     HTTPException,
