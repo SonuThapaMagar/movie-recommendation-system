@@ -1,4 +1,4 @@
-from sqlalchemy import Column,Integer,Float, BigInteger,ForeignKey
+from sqlalchemy import Column,Integer,Float, BigInteger,ForeignKey,UniqueConstraint
 from sqlalchemy.orm import relationship
 from app.database.database import Base
 
@@ -6,10 +6,18 @@ class Rating(Base):
 
     __tablename__ = "ratings"
     
+    __table_args__=(
+        UniqueConstraint(
+            "user_id",
+            "movie_id",
+            name="uq_user_movie_rating"
+        ),
+    )
+    
     rating_id=Column(Integer,primary_key=True,index=True)
     
     # Original MovieLens user ID
-    dataset_user_id=Column(Integer,nullable=False,index=True)
+    dataset_user_id=Column(Integer,nullable=True,index=True)
     
     # Registered application user ID
     user_id = Column(Integer,ForeignKey("users.id"),nullable=True,index=True)
