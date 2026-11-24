@@ -71,7 +71,7 @@ def get_recommended_movies(user_id,top_n=10):
     #convert recommendations into DF
     recommendations_df=pd.DataFrame(
         recommendations,
-        columns=["movie_id","similarity_score"]
+        columns=["movie_id","predicted_rating"]
     )
     
     #Attach movie title and genres
