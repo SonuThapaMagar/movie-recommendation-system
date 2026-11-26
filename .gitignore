@@ -161,4 +161,5 @@ venv/
 .env
 .env.*
 
-.pklbackend/data/recommendation/recommendation_data.pkl
+backend/data/recommendation/recommendation_data.pkl
+*.pkl
