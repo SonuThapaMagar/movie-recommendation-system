@@ -2,7 +2,7 @@ import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import linear_kernel
 from sqlalchemy.orm import Session
-
+from sqlalchemy import func
 from app.models.movie import Movie
 from app.models.movie_tag import MovieTag
 from app.models.rating import Rating
@@ -167,8 +167,42 @@ def get_recommendation_for_user(db:Session,user_id:int,top_n:int=10):
         for rating in ratings
     }
     
-    if not user_ratings: 
-        return [],"No user ratings"
+    if not user_ratings:
+
+        # Get popular movies using all available ratings
+        popular_movies = (
+            db.query(
+                Movie,
+                func.avg(Rating.rating).label("average_rating"),
+                func.count(Rating.rating).label("rating_count")
+            )
+            .join(Rating, Movie.movie_id == Rating.movie_id)
+            .group_by(Movie.movie_id)
+            .having(func.count(Rating.rating) >= 5)
+            .order_by(
+                func.count(Rating.rating).desc(),
+                func.avg(Rating.rating).desc()
+            )
+            .limit(top_n)
+            .all()
+        )
+
+        results = []
+
+        for movie, average_rating, rating_count in popular_movies:
+
+            results.append({
+                "movie_id": movie.movie_id,
+                "title": movie.title,
+                "genres": movie.genres,
+                "poster_url": movie.poster_url,
+                "overview": movie.overview,
+                "rating": movie.rating,
+                "release_date": movie.release_date,
+                "predicted_rating": round(float(average_rating), 2)
+            })
+
+        return results
     
     
     #generate recommendation
