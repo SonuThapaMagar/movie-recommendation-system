@@ -5,7 +5,9 @@ from sqlalchemy.orm import Session
 
 from app.models.movie import Movie
 from app.models.movie_tag import MovieTag
+from app.models.rating import Rating
 from app.services.movie_service import get_movie_details
+from app.recommender.recommendation import (recommend_movies_from_ratings)
 
 def prepare_movie_data(db:Session):
     #Fetch all movies
@@ -149,3 +151,63 @@ def get_movie_recommendations(db, movie_id, top_n=10):
         db.commit()
         
     return recommendations
+
+def get_recommendation_for_user(db:Session,user_id:int,top_n:int=10):
+    #fetch logged in user ratings
+    ratings = (
+        db.query(Rating)
+        .filter(Rating.user_id == user_id)
+        .all()
+    )
+
+    
+    #convert rating into dict
+    user_ratings={
+        rating.movie_id:rating.rating
+        for rating in ratings
+    }
+    
+    if not user_ratings: 
+        return [],"No user ratings"
+    
+    
+    #generate recommendation
+    recommendations=recommend_movies_from_ratings(
+        user_ratings=user_ratings,
+        top_n=top_n
+    )
+    
+    #extract recommended movie ID
+    movie_ids=[movie_id for movie_id,predicted_rating in recommendations]
+    
+    if not movie_ids:
+        return []
+    
+    movies=(
+        db.query(Movie).filter(Rating.movie_id.in_(movie_ids)).all()
+    )
+    
+    movies_by_id={movie.movie_id:movie for movie in movies}
+    
+    results=[]
+    
+    for movie_id,predicted_rating in recommendations:
+        movie=movies_by_id.get(movie_id)
+        
+        if not movie: 
+            continue
+        
+        results.append({
+            "movie_id": movie.movie_id,
+            "title": movie.title,
+            "genres": movie.genres,
+            "poster_url": movie.poster_url,
+            "overview": movie.overview,
+            "rating": movie.rating,
+            "release_date": movie.release_date,
+            "predicted_rating": round(
+                float(predicted_rating), 2
+            )
+        })
+    
+    return results
